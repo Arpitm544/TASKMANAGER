@@ -1,0 +1,197 @@
+import { useState, useEffect } from 'react';
+import axios from 'axios';
+
+const API_URL = 'http://localhost:5000/api';
+
+function TaskBoard() {
+  const [tasks, setTasks] = useState([]);
+  const [newTask, setNewTask] = useState({
+    title: '',
+    description: '',
+    status: 'todo',
+    dueDate: '',
+  });
+
+  useEffect(() => {
+    fetchTasks();
+  }, []);
+
+  const fetchTasks = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/tasks`);
+      setTasks(response.data);
+    } catch (error) {
+      alert('Error fetching tasks', 'error');
+    }
+  };
+
+
+
+  const handleInputChange = (e) => {
+    setNewTask({
+      ...newTask,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post(`${API_URL}/tasks`, newTask);
+      fetchTasks();
+      setNewTask({
+        title: '',
+        description: '',
+        status: 'todo',
+        dueDate: '',
+      });
+      alert('Task created successfully');
+    } catch (error) {
+      alert('Error creating task', 'error');
+    }
+  };
+
+  const handleStatusChange = async (taskId, newStatus) => {
+    try {
+      await axios.patch(`${API_URL}/tasks/${taskId}`, { status: newStatus });
+      fetchTasks();
+      alert('Task status updated');
+    } catch (error) {
+      alert('Error updating task status', 'error');
+    }
+  };
+
+  const handleDeleteTask = async (taskId) => {
+    try {
+      await axios.delete(`${API_URL}/tasks/${taskId}`);
+      fetchTasks();
+      alert('Task deleted successfully');
+    } catch (error) {
+      alert('Error deleting task', 'error');
+    }
+  };
+
+  const getTasksByStatus = (status) => {
+    return tasks.filter((task) => task.status === status);
+  };
+
+  const getStatusLabel = (status) => {
+    return {
+      'todo': 'To Do',
+      'in-progress': 'In Progress',
+      'done': 'Done'
+    }[status];
+  };
+
+  return (
+    <div className="task-board">
+      <div className="board-header">
+        <h1 className="board-title">Task Board</h1>
+      </div>
+
+      <div className="add-task-form">
+        <h2>Add New Task</h2>
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="title">Title</label>
+            <input
+              type="text"
+              id="title"
+              name="title"
+              value={newTask.title}
+              onChange={handleInputChange}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="description">Description</label>
+            <textarea
+              id="description"
+              name="description"
+              value={newTask.description}
+              onChange={handleInputChange}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="status">Status</label>
+            <select
+              id="status"
+              name="status"
+              value={newTask.status}
+              onChange={handleInputChange}
+            >
+              <option value="todo">To Do</option>
+              <option value="in-progress">In Progress</option>
+              <option value="done">Done</option>
+            </select>
+          </div>
+          <div className="form-group">
+            <label htmlFor="dueDate">Due Date</label>
+            <input
+              type="date"
+              id="dueDate"
+              name="dueDate"
+              value={newTask.dueDate}
+              onChange={handleInputChange}
+            />
+          </div>
+          <button type="submit" className="button button-primary">Create Task</button>
+        </form>
+      </div>
+
+      <div className="columns-container">
+        {['todo', 'in-progress', 'done'].map((status) => (
+          <div key={status} className="column">
+            <div className="column-header">
+              <h2 className="column-title">{getStatusLabel(status)}</h2>
+              <span className="task-count">{getTasksByStatus(status).length}</span>
+            </div>
+            <div>
+              {getTasksByStatus(status).map((task) => (
+                <div key={task._id} className="task-card">
+                  <div className="task-header">
+                    <h3 className="task-title">{task.title}</h3>
+                    <button
+                      className="delete-button"
+                      onClick={() => handleDeleteTask(task._id)}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                  <span className={`task-status status-${task.status}`}>
+                    {getStatusLabel(task.status)}
+                  </span>
+                  <p className="task-description">{task.description}</p>
+                  {task.dueDate && (
+                    <div className="task-due-date">
+                      <span>Due: {new Date(task.dueDate).toLocaleDateString()}</span>
+                    </div>
+                  )}
+                  <div className="task-actions">
+                    {status !== 'done' && (
+                      <button
+                        className="button button-secondary"
+                        onClick={() =>
+                          handleStatusChange(
+                            task._id,
+                            status === 'todo' ? 'in-progress' : 'done'
+                          )
+                        }
+                      >
+                        Move to {status === 'todo' ? 'In Progress' : 'Done'}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+    </div>
+  );
+}
+
+export default TaskBoard; 
