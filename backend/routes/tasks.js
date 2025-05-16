@@ -4,10 +4,14 @@ const auth = require('../middleware/auth');
 const { body } = require('express-validator');
 const taskController = require('../controllers/taskController');
 
+// Get all tasks for the current user
+router.get('/', auth, taskController.getAllTasks);
+
 // Create a new task
 router.post('/', auth, [
     body('title').trim().notEmpty().withMessage('Task title is required'),
-    body('project').notEmpty().withMessage('Project ID is required')
+    body('description').trim().notEmpty().withMessage('Task description is required'),
+    body('status').isIn(['todo', 'in-progress', 'done']).withMessage('Invalid status')
 ], taskController.createTask);
 
 // Get all tasks for a project

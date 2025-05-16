@@ -18,8 +18,19 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/taskmanag
     useNewUrlParser: true,
     useUnifiedTopology: true
 })
-.then(() => console.log('Connected to MongoDB'))
-.catch(err => console.error('MongoDB connection error:', err));
+.then(async () => {
+    console.log('Connected to MongoDB');
+    // Drop the googleId index if it exists
+    try {
+        await mongoose.connection.db.collection('users').dropIndex('googleId_1');
+    } catch (error) {
+        // Index might not exist, which is fine
+        if (error.code !== 27) {
+            console.error('Error dropping index:', error);
+        }
+    }
+})
+.catch((error) => console.error('MongoDB connection error:', error));
 
 // Routes
 app.use('/api/auth', authRoutes);

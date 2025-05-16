@@ -1,18 +1,30 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import Login from './components/auth/Login';
+import Signup from './components/auth/Signup';
 import TaskBoard from './components/TaskBoard';
-import Dashboard from './components/Dashboard';
-import Header from './components/Header';
+import './App.css';
+
+const PrivateRoute = ({ children }) => {
+  const token = localStorage.getItem('token');
+  return token ? children : <Navigate to="/login" />;
+};
 
 function App() {
   return (
     <Router>
-      <Header />
-      <div className="container">
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/tasks" element={<TaskBoard />} />
-        </Routes>
-      </div>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route
+          path="/tasks"
+          element={
+            <PrivateRoute>
+              <TaskBoard />
+            </PrivateRoute>
+          }
+        />
+        <Route path="/" element={<Navigate to="/tasks" />} />
+      </Routes>
     </Router>
   );
 }

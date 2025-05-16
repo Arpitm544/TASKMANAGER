@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import './TaskBoard.css';
 
 const API_URL = 'http://localhost:5000/api';
 
 function TaskBoard() {
   const [tasks, setTasks] = useState([]);
+  const navigate = useNavigate();
   const [newTask, setNewTask] = useState({
     title: '',
     description: '',
@@ -12,20 +15,32 @@ function TaskBoard() {
     dueDate: '',
   });
 
+  const getAuthHeaders = () => ({
+    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+  });
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/login');
+  };
+
   useEffect(() => {
     fetchTasks();
   }, []);
 
   const fetchTasks = async () => {
     try {
-      const response = await axios.get(`${API_URL}/tasks`);
+      const response = await axios.get(`${API_URL}/tasks`, getAuthHeaders());
       setTasks(response.data);
     } catch (error) {
-      alert('Error fetching tasks', 'error');
+      if (error.response?.status === 401) {
+        handleLogout();
+      } else {
+        alert('Error fetching tasks');
+      }
     }
   };
-
-
 
   const handleInputChange = (e) => {
     setNewTask({
@@ -37,7 +52,7 @@ function TaskBoard() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(`${API_URL}/tasks`, newTask);
+      await axios.post(`${API_URL}/tasks`, newTask, getAuthHeaders());
       fetchTasks();
       setNewTask({
         title: '',
@@ -47,27 +62,39 @@ function TaskBoard() {
       });
       alert('Task created successfully');
     } catch (error) {
-      alert('Error creating task', 'error');
+      if (error.response?.status === 401) {
+        handleLogout();
+      } else {
+        alert('Error creating task');
+      }
     }
   };
 
   const handleStatusChange = async (taskId, newStatus) => {
     try {
-      await axios.patch(`${API_URL}/tasks/${taskId}`, { status: newStatus });
+      await axios.patch(`${API_URL}/tasks/${taskId}`, { status: newStatus }, getAuthHeaders());
       fetchTasks();
       alert('Task status updated');
     } catch (error) {
-      alert('Error updating task status', 'error');
+      if (error.response?.status === 401) {
+        handleLogout();
+      } else {
+        alert('Error updating task status');
+      }
     }
   };
 
   const handleDeleteTask = async (taskId) => {
     try {
-      await axios.delete(`${API_URL}/tasks/${taskId}`);
+      await axios.delete(`${API_URL}/tasks/${taskId}`, getAuthHeaders());
       fetchTasks();
       alert('Task deleted successfully');
     } catch (error) {
-      alert('Error deleting task', 'error');
+      if (error.response?.status === 401) {
+        handleLogout();
+      } else {
+        alert('Error deleting task');
+      }
     }
   };
 
@@ -87,6 +114,7 @@ function TaskBoard() {
     <div className="task-board">
       <div className="board-header">
         <h1 className="board-title">Task Board</h1>
+        <button onClick={handleLogout} className="logout-button">Logout</button>
       </div>
 
       <div className="add-task-form">
