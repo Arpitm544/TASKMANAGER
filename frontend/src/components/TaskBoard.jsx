@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import './TaskBoard.css';
-
 const API_URL = 'http://localhost:5000/api';
 
 function TaskBoard() {
@@ -112,10 +110,12 @@ function TaskBoard() {
 
   return (
     <div className="task-board">
-      <div className="board-header">
-        <h1 className="board-title">Task Board</h1>
-        <button onClick={handleLogout} className="logout-button">Logout</button>
-      </div>
+      <div className="task-board">
+  <div className="task-board-header">
+    <h1 className="task-board-title">Task Board</h1>
+    <button onClick={handleLogout} className="logout-button">Logout</button>
+  </div>
+</div>
 
       <div className="add-task-form">
         <h2>Add New Task</h2>
@@ -168,35 +168,30 @@ function TaskBoard() {
         </form>
       </div>
 
-      <div className="columns-container">
+      <div className="columns-container" >
         {['todo', 'in-progress', 'done'].map((status) => (
           <div key={status} className="column">
             <div className="column-header">
-              <h2 className="column-title">{getStatusLabel(status)}</h2>
-              <span className="task-count">{getTasksByStatus(status).length}</span>
+              <h2 style={{color: 'green'}}>{getStatusLabel(status)}</h2>
             </div>
             <div>
               {getTasksByStatus(status).map((task) => (
-                <div key={task._id} className="task-card">
-                  <div className="task-header">
-                    <h3 className="task-title">{task.title}</h3>
-                    <button
-                      className="delete-button"
+                <div key={task._id} >
+                  <div>
+                    <h3>{task.title}</h3>
+                    <button style={{color: 'red', backgroundColor: 'white', border: '1px solid red', borderRadius: '5px', padding: '5px 10px', cursor: 'pointer'}}
                       onClick={() => handleDeleteTask(task._id)}
                     >
                       Delete
                     </button>
                   </div>
-                  <span className={`task-status status-${task.status}`}>
-                    {getStatusLabel(task.status)}
-                  </span>
                   <p className="task-description">{task.description}</p>
                   {task.dueDate && (
-                    <div className="task-due-date">
+                    <div>
                       <span>Due: {new Date(task.dueDate).toLocaleDateString()}</span>
                     </div>
                   )}
-                  <div className="task-actions">
+                  <div>
                     {status !== 'done' && (
                       <button
                         className="button button-secondary"

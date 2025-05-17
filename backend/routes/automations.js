@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
 const { body } = require('express-validator');
-const automationController = require('../controllers/automationController');
+const { getProjectAutomations, getAutomation, updateAutomation, deleteAutomation, createAutomation } = require('../controllers/automationController');
 
 // Create a new automation
 router.post('/', auth, [
@@ -11,18 +11,18 @@ router.post('/', auth, [
     body('trigger').isIn(['task_created', 'task_completed', 'due_date_approaching', 'status_changed'])
         .withMessage('Invalid trigger type'),
     body('actions').isArray({ min: 1 }).withMessage('At least one action is required')
-], automationController.createAutomation);
+], createAutomation);
 
 // Get all automations for a project
-router.get('/project/:projectId', auth, automationController.getProjectAutomations);
+router.get('/project/:projectId', auth, getProjectAutomations);
 
 // Get a specific automation
-router.get('/:id', auth, automationController.getAutomation);
+router.get('/:id', auth, getAutomation);
 
 // Update an automation
-router.patch('/:id', auth, automationController.updateAutomation);
+router.patch('/:id', auth, updateAutomation);
 
 // Delete an automation
-router.delete('/:id', auth, automationController.deleteAutomation);
+router.delete('/:id', auth, deleteAutomation);
 
 module.exports = router; 
