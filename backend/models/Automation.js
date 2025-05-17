@@ -6,11 +6,6 @@ const automationSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
-    project: {
-        type: mongoose.Schema.Types.ObjectId,
-        required: true,
-        ref: 'Project'
-    },
     trigger: {
         type: String,
         enum: ['task_created', 'task_completed', 'due_date_approaching', 'status_changed'],

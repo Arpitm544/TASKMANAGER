@@ -8,11 +8,8 @@ const taskSchema = new mongoose.Schema({
     },
     description: {
         type: String,
-        trim: true
-    },
-    project: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Project'
+        trim: true,
+        default: ''
     },
     assignedTo: {
         type: mongoose.Schema.Types.ObjectId,
@@ -22,7 +19,8 @@ const taskSchema = new mongoose.Schema({
     status: {
         type: String,
         enum: ['todo', 'in-progress', 'done'],
-        default: 'todo'
+        default: 'todo',
+        required: true
     },
     priority: {
         type: String,
@@ -30,11 +28,15 @@ const taskSchema = new mongoose.Schema({
         default: 'medium'
     },
     dueDate: {
-        type: Date
+        type: Date,
+        required: false
     }
 }, {
     timestamps: true
 });
+
+// Add index for better query performance
+taskSchema.index({ assignedTo: 1, status: 1 });
 
 const Task = mongoose.model('Task', taskSchema);
 module.exports = Task; 
